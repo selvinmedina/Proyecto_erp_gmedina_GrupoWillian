@@ -52,8 +52,9 @@ function cargarGridDeducciones() {
 }
 
 //FUNCION: CARGAR DATA DE UNA PLANILLA ESPECIFICA Y REFRESCAR LA TABLA DEL INDEX ================================
-$('#generarPlanilla').click(function () {
+$('.generarPlanilla').click(function () {
     var ID = $(this).data('id');
+    console.log(ID);
     _ajax(null,
         '/Planilla/GetPlanilla/'+ID,
         'GET',

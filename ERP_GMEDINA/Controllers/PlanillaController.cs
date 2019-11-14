@@ -23,12 +23,12 @@ namespace ERP_GMEDINA.Controllers
             return View(db.V_PreviewPlanilla.ToList());
         }
 
-        public ActionResult GetPlanilla(int? idPlanilla)
+        public ActionResult GetPlanilla(int? ID)
         {
             List<V_PreviewPlanilla> PreviewPlanilla = new List<V_PreviewPlanilla>();
 
-            if (idPlanilla != null)
-                PreviewPlanilla = db.V_PreviewPlanilla.Where(x => x.cpla_IdPlanilla == idPlanilla).ToList();
+            if (ID != null)
+                PreviewPlanilla = db.V_PreviewPlanilla.Where(x => x.cpla_IdPlanilla == ID).ToList();
             else
                 PreviewPlanilla = db.V_PreviewPlanilla.ToList();
             return Json(PreviewPlanilla, JsonRequestBehavior.AllowGet);
@@ -104,8 +104,12 @@ namespace ERP_GMEDINA.Controllers
                                     {
                                         DeduccionesExtraordinarias += oDeduccionesExtrasColaboradorIterador.dex_Cuota;
                                         //CÓDIGO PARA RESTAR LA CUOTA PAGADA DE LA CANTIDAD RESTANTE DE LA DEDUCCIÓN
+                                        oDeduccionesExtrasColaboradorIterador.dex_MontoRestante = oDeduccionesExtrasColaboradorIterador.dex_MontoRestante - oDeduccionesExtrasColaboradorIterador.dex_Cuota;
+                                        db.Entry(oDeduccionesExtrasColaboradorIterador).State = EntityState.Modified;
                                     }
+                                    db.SaveChanges();
                                 }
+
 
                                 //OBTENER LAS DEDUCCIONES POR INSTITUCIONES FINANCIERAS DEL COLABORADOR ACTUAL
                                 List<V_DeduccionesInstitucionesFinancierasColaboradres> oDeduInstiFinancieras = db.V_DeduccionesInstitucionesFinancierasColaboradres.Where(x => x.emp_Id == empleadoActual.emp_Id && x.deif_Activo == true).ToList();
@@ -120,6 +124,8 @@ namespace ERP_GMEDINA.Controllers
                                         //CÓDIGO PARA RESTAR LA CUOTA PAGADA DE LA CANTIDAD RESTANTE DE LA DEDUCCIÓN
                                     }
                                 }
+
+
 
 
 
