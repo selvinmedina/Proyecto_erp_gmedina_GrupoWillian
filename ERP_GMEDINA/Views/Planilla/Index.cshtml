@@ -17,7 +17,7 @@
                             <i class="fa fa-user fa-3x"></i>
                         </div>
                         <div class="col-xs-8 text-right">
-                            <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit; color:white;"><b><a style="vertical-align: inherit;color:white;" href="" class="generarPlanilla" data-id="">Todos</a></b></font></font></span>
+                            <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit; color:white;"><b><a style="vertical-align: inherit;color:white;" href="#" class="cargarPlanilla" data-id="">Todos</a></b></font></font></span>
                             <h2 class="font-bold"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">@ViewBag.colaboradoresGeneral</font></font></h2>
                         </div>
                     </div>
@@ -33,8 +33,19 @@
                             <i class="fa fa-user fa-3x"></i>
                         </div>
                         <div class="col-xs-8 text-right">
-                            <span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;color:white;"><b><a href="" style="vertical-align: inherit;color:white;" class="generarPlanilla" data-id="@item.cpla_IdPlanilla">@item.cpla_DescripcionPlanilla</a></b></font></font></span>
-                            <h2 class="font-bold"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">@item.CantidadColaboradores</font></font></h2>
+                            <span>
+                            <font style="vertical-align: inherit;">
+                                <font style="vertical-align: inherit;color:white;">
+                                <b><a href="#" style="vertical-align: inherit;color:white;" class="cargarPlanilla" data-id="@item.cpla_IdPlanilla">
+                                    @item.cpla_DescripcionPlanilla
+                                    </a></b>
+                                </font>
+                                </font>
+                            </span>
+                            <h2 class="font-bold"><font style="vertical-align: inherit;">
+                                <font style="vertical-align: inherit;">@item.CantidadColaboradores</font>
+                                </font>
+                            </h2>
                         </div>
                     </div>
                 </div>
@@ -50,22 +61,17 @@
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>Colaboradores de la planilla</h5>
+                    <h5>Colaboradores de la planilla <b id="nombrePlanilla"> </b></h5>
                     <div class="ibox-tools">
-                        <a class="collapse-link">
-                            <i class="fa fa-chevron-up"></i>
-                        </a>
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <i class="fa fa-wrench"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-user">
-                            <li><a href="#">Config option 1</a></li>
-                            <li><a href="#">Config option 2</a></li>
-                        </ul>
-                        <a class="close-link">
-                            <i class="fa fa-times">
-                            </i>
-                        </a>
+                        <button type="button" class="btn btn-primary btn-w-m" id="btnPlanilla">Generar planilla</button>
+
+                        <div  id="Cargando" style="display:none" class="sk-spinner sk-spinner-wave pull-right">
+                            <div class="sk-rect1"></div>
+                            <div class="sk-rect2"></div>
+                            <div class="sk-rect3"></div>
+                            <div class="sk-rect4"></div>
+                            <div class="sk-rect5"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="ibox-content">
@@ -118,6 +124,24 @@
     </div>
 </div>
 
+@* Modal de confirmación generar planilla *@
+<div class="modal fade" id="confirmarGenerarPlanilla" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Generar planilla</h4>
+            </div>
+            <div class="modal-body" id="Inactivar">
+                ¿Está seguro que desea generar planilla?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger " id="btnGenerarPlanilla">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @*<div class="modal fade" id="EditarCatalogoDeducciones" tabindex="-1" role="dialog" aria-hidden="false">
     <div class="modal-dialog">

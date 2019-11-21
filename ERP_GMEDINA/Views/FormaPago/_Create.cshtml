@@ -1,0 +1,34 @@
+﻿@model ERP_GMEDINA.Models.tbFormaPago
+
+        @using (Ajax.BeginForm(null, null, new AjaxOptions
+        {
+            //InsertionMode = InsertionMode.Replace,
+            //UpdateTargetId = "patientList",
+            //LoadingElementId = "loader"
+        }, new { id = "frmCreateFormaPago" }))
+        {
+          <div class="ibox-content">
+            @Html.AntiForgeryToken()
+              <div class="form-horizontal">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                  @Html.HiddenFor(model => model.fpa_UsuarioCrea)
+                  @Html.HiddenFor(model => model.fpa_FechaCrea)
+
+                  <div class="form-group">
+                    @Html.LabelFor(model => model.fpa_Descripcion, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                      @Html.EditorFor(model => model.fpa_Descripcion, new { htmlAttributes = new { @class = "form-control" } })
+                      @Html.ValidationMessageFor(model => model.fpa_Descripcion, "", new { @class = "text-danger", @id = "Validation_descripcion" })
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                      <input type="button" value="Guardar" id="btnRegistrarFormaPago" class="btn btn-primary" />
+      	            @Html.ActionLink("Cancelar", "Index", null, new { @class="btn btn-default"})
+                    </div>
+                  </div>
+                </div>
+              </div>
+          }

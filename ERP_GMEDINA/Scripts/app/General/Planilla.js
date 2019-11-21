@@ -18,47 +18,21 @@ function _ajax(params, uri, type, callback) {
         }
     });
 }
-//FUNCION: CARGAR DATA Y REFRESCAR LA TABLA DEL INDEX
-function cargarGridDeducciones() {
-    _ajax(null,
-        '/CatalogoDeDeducciones/GetData',
-        'GET',
-        (data) => {
-            if (data.length == 0) {
-                //Validar si se genera un error al cargar de nuevo el grid
-                iziToast.error({
-                    title: 'Error',
-                    message: 'No se pudo cargar la información, contacte al administrador',
-                });
-            }
-            //GUARDAR EN UNA VARIABLE LA DATA OBTENIDA
-            var ListaDeducciones = data, template = '';
-            //RECORRER DATA OBETINA Y CREAR UN "TEMPLATE" PARA REFRESCAR EL TBODY DE LA TABLA DEL INDEX
-            for (var i = 0; i < ListaDeducciones.length; i++) {
-                template += '<tr data-id = "' + ListaDeducciones[i].cde_IdDeducciones + '">' +
-                    '<td>' + ListaDeducciones[i].cde_DescripcionDeduccion + '</td>' +
-                    '<td>' + ListaDeducciones[i].cde_PorcentajeColaborador + '</td>' +
-                    '<td>' + ListaDeducciones[i].cde_PorcentajeEmpresa + '</td>' +
-                    '<td>' + ListaDeducciones[i].tde_Descripcion + '</td>' +
-                    '<td>' +
-                    '<button type="button" data-id = "' + ListaDeducciones[i].cde_IdDeducciones + '" class="btn btn-primary btn-xs" id="btnEditarCatalogoDeducciones">Editar</button>' +
-                    '<button type="button" data-id = "' + ListaDeducciones[i].cde_IdDeducciones + '" class="btn btn-default btn-xs" id="btnDetalleCatalogoDeducciones">Detalle</button>' +
-                    '</td>' +
-                    '</tr>';
-            }
-            //REFRESCAR EL TBODY DE LA TABLA DEL INDEX
-            $('#tbodyDeducciones').html(template);
-        });
-}
+//variable para reconocer la planilla actual de la tabla
+var planillaId = '';
+
 
 //FUNCION: CARGAR DATA DE UNA PLANILLA ESPECIFICA Y REFRESCAR LA TABLA DEL INDEX ================================
-$('.generarPlanilla').click(function () {
+$('.cargarPlanilla').click(function () {
+    $('#btnPlanilla').css('display', 'none');
+    $('#Cargando').css('display', '');
     var ID = $(this).data('id');
     console.log(ID);
     _ajax(null,
         '/Planilla/GetPlanilla/'+ID,
         'GET',
         (data) => {
+            console.log(data);
             if (data.length == 0) {
                 //Validar si se genera un error al cargar la data de la planilla especifica
                 iziToast.error({
@@ -76,15 +50,67 @@ $('.generarPlanilla').click(function () {
                     '<td>' + PlanillaSeleccionada[i].salarioBase + '</td>' +
                     '<td>' + PlanillaSeleccionada[i].tmon_Descripcion + '</td>' +
                     '<td>' +
-                    '<button type="button" data-id = "' + PlanillaSeleccionada[i].emp_Id + '" class="btn btn-primary btn-xs" id="btnEditarCatalogoDeducciones">Editar</button>' +
                     '<button type="button" data-id = "' + PlanillaSeleccionada[i].emp_Id + '" class="btn btn-default btn-xs" id="btnDetalleCatalogoDeducciones">Detalle</button>' +
                     '</td>' +
                     '</tr>';
             }
+            ID=='' ? planillaId = null : planillaId =  data[0].cpla_IdPlanilla;
             //REFRESCAR EL TBODY DE LA TABLA DEL INDEX
             $('#tbodyPreviewPlanilla').html(template);
+            ID == '' ? $('#nombrePlanilla').html('') : $('#nombrePlanilla').html(data[0].cpla_DescripcionPlanilla);
+            $('#btnPlanilla').css('display', '');
+            $('#Cargando').css('display', 'none');
         });
 });
+
+
+
+//GENERAR PLANILLA =======================================================================================
+$('#btnPlanilla').click(function () {
+    $('#confirmarGenerarPlanilla').modal();
+});
+$('#btnGenerarPlanilla').click(function () {
+    $('#btnPlanilla').css('display', 'none');
+    $('#Cargando').css('display', '');
+    $('#confirmarGenerarPlanilla').hide();
+    var ID = planillaId;
+    console.log('ID PLANILLA A GENERAR:  ' + planillaId);
+    _ajax(null,
+        '/Planilla/GenerarPlanilla/' + ID,
+        'GET',
+        (data) => {
+            $('#btnPlanilla').css('display', '');
+            $('#Cargando').css('display', 'none');
+            console.log(data);
+            if (data.Tipo=='success') {
+                iziToast.success({
+                    title: data.Encabezado,
+                    message: data.Response,
+                });
+            }
+            else if (data.Tipo == 'error') {
+                iziToast.error({
+                    title: data.Encabezado,
+                    message: data.Response,
+                });
+            }
+            else {
+                iziToast.warning({
+                    title: data.Encabezado,
+                    message: data.Response,
+                });
+            }
+
+            
+            $('.modal-backdrop').css('display', 'none');
+            $('.fade').css('display', 'none');
+            $('.in').css('display', 'none');
+        }
+    );
+});
+
+
+
 // =====================================================================================================
 
 //FUNCION: PRIMERA FASE DE EDICION DE REGISTROS, MOSTRAR MODAL CON LA INFORMACIÓN DEL REGISTRO SELECCIONADO
@@ -241,12 +267,10 @@ $(document).on("click", "#tblCatalogoDeducciones tbody tr td #btnDetalleCatalogo
             }
         });
 });
-///////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 //FUNCION: CREAR EL NUEVO REGISTRO
 $('#btnCreateRegistroDeduccion').click(function () {
-    // SIEMPRE HACER LAS RESPECTIVAS VALIDACIONES DEL LADO DEL CLIENTE
-
     //SERIALIZAR EL FORMULARIO DEL MODAL (ESTÁ EN LA VISTA PARCIAL)
     var data = $("#frmCatalogoDeduccionesCreate").serializeArray();
     //ENVIAR DATA AL SERVIDOR PARA EJECUTAR LA INSERCIÓN
@@ -289,7 +313,6 @@ $(document).on("click", "#btnmodalInactivarCatalogoDeducciones", function () {
 $("#btnInactivarRegistroDeduccion").click(function () {
 
     var data = $("#frmCatalogoDeduccionesInactivar").serializeArray();
-    //SE ENVIA EL JSON AL SERVIDOR PARA EJECUTAR LA EDICIÓN
     $.ajax({
         url: "/CatalogoDeDeducciones/Inactivar",
         method: "POST",
@@ -303,7 +326,6 @@ $("#btnInactivarRegistroDeduccion").click(function () {
             });
         }
         else {
-            // REFRESCAR UNICAMENTE LA TABLA
             cargarGridDeducciones();
             //UNA VEZ REFRESCADA LA TABLA, SE OCULTA EL MODAL
             $("#InactivarCatalogoDeducciones").modal('hide');
@@ -316,15 +338,5 @@ $("#btnInactivarRegistroDeduccion").click(function () {
         }
     });
 });
-
-
-// PROBANDO LOS IZITOAST
-//$(document).ready(function () {
-//    console.log('cargado JS');
-//    iziToast.show({
-//        title: 'Hola',
-//        message: 'Estoy probando los iziToast'
-//    });
-//});
 
 
