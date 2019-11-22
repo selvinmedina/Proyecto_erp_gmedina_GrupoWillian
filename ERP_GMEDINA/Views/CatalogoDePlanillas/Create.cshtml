@@ -35,7 +35,7 @@
                                 <div class="col-md-5">
                                     @Html.EditorFor(model => model.cpla_FrecuenciaEnDias, new { htmlAttributes = new { @class = "form-control" } })
                                     <span class="field-validation-valid text-danger" style="display:none" id="validacionFrecuenciaDias" data-valmsg-for="cpla_FrecuenciaEnDias" data-valmsg-replace="true">El campo Frecuencia en días es obligatorio, y tiene que ser un número mayor que cero.</span>
-                                </div>                                    
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -48,7 +48,7 @@
                                 <h5>Lista del catalogo de Ingresos</h5>
                             </div>
                             <div class="ibox-content">
-                            <span class="field-validation-valid text-danger" style="display:none" id="validacionCatalogoIngresos" data-valmsg-replace="true">Debe de seleccionar por lo menos un ingreso</span>
+                                <span class="field-validation-valid text-danger" style="display:none" id="validacionCatalogoIngresos" data-valmsg-replace="true">Debe de seleccionar por lo menos un ingreso</span>
                                 @foreach (var item in ViewBag.CatalogoIngresos)
                                 {
                                     <div class="form-horizontal col-xs-offset-1">

@@ -5,8 +5,8 @@ var pathname = window.location.pathname + '/',
     URLactual = window.location.toString(),
     getUrl = window.location,
     baseUrl = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1],
+    urlProtocoloDominio = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : ''),
     table;//Almacenar la tabla
-
 
 //Constantes
 const btnGuardar = $('#btnGuardarCatalogoDePlanillasIngresosDeducciones'), //Boton para guardar el catalogo de planilla con sus detalles
@@ -55,38 +55,69 @@ function scrollArriba() {
     htmlBody.animate({ scrollTop: 60 }, 300);
 }
 
-//Cuando cargue entonces que liste los datos en la tabla
-$(document).ready(() => {
-    if (getUrl.toString().indexOf('Create') < 1 && getUrl.toString().indexOf('Edit') < 1) {
-        listar();
-    }
+function ocultarCargandoEditar() {
+    btnEditar.show();
+    cargandoEditar.html('');
+    cargandoEditar.hide();
+}
 
-    //Validar que no haya un /Index en la URL, si no falla el AJAX
-    let ubicacionIndexUrl = URLactual.indexOf('/Index');
-    if (ubicacionIndexUrl > 0) {
-        location.href = URLactual.replace('/Index', '');
-    }
+function mostrarCargandoEditar() {
+    btnEditar.hide();
+    cargandoEditar.html(spinner());
+    cargandoEditar.show();
+}
 
-    //Validar la descripción de la planilla cuando se salga del input
-    inputDescripcionPlanilla.blur(function () {
-        if ($(this).val() != "") {
-            validacionDescripcionPlanilla.hide();
-        } else {
-            validacionDescripcionPlanilla.show();
-        }
-    });
+function mostrarCargandoCrear() {
+    btnGuardar.hide();
+    cargandoCrear.html(spinner());
+    cargandoCrear.show();
+}
 
-    //Validar la frecuencia en dias cuando se salga del input
-    inputFrecuenciaEnDias.blur(function () {
-        if (inputFrecuenciaEnDias.val() != "" && inputFrecuenciaEnDias.val() != "0" && inputFrecuenciaEnDias.val() > 0) {
-            validacionFrecuenciaDias.hide();
-        } else {
-            validacionFrecuenciaDias.show();
-        }
-    });
+function ocultarCargandoCrear() {
+    btnGuardar.show();
+    cargandoCrear.html('');
+    cargandoCrear.hide();
+}
 
+//Para editar o insertar utilizare esta función, para validar los campos
+function verificarCampos(descripcionPlanilla, frecuenciaDias, catalogoIngresos, catalogoDeducciones) {
+    var todoBien = true;
+    //Validar que la descripción este bien
+    if (descripcionPlanilla.trim() == "") {
+        scrollArriba();
+        validacionDescripcionPlanilla.show();
+        todoBien = false;
+    } else
+        validacionDescripcionPlanilla.hide();
+    //Validar que la frecuencia en días esté bien
+    if (frecuenciaDias.trim() == "" || parseInt(frecuenciaDias) <= 0) {
+        scrollArriba();
+        validacionFrecuenciaDias.show();
+        todoBien = false;
+    } else
+        validacionFrecuenciaDias.hide();
 
-});
+    //Validar que se haya seleccionado por lo menos un ingreso
+    if (catalogoIngresos.length == 0) {
+        scrollArriba();
+        validacionCatalogoIngresos.show();
+        todoBien = false;
+    } else
+        validacionCatalogoIngresos.hide();
+
+    //Validar qeu por lo meno se halla seleccionado una deducción
+    if (catalogoDeducciones.length == 0) {
+        scrollArriba();
+        validacionCatalogoDeducciones.show();
+        todoBien = false;
+    } else
+        validacionCatalogoDeducciones.hide();
+
+    return todoBien;
+}
+
+console.log(urlProtocoloDominio + '/Content/img/flecha-derecha.png');
+
 //Datatables
 function listar() {
     //Almacenar la tabla creada
@@ -100,14 +131,16 @@ function listar() {
         },
         'columns': [
             {//Columna 1: el boton de desplegar
-                "className": 'details-control', //Estos estilos estan en: Content/app/General
                 "orderable": false,
+                "className": 'details-control', //Estos estilos estan en: Content/app/General
                 "data": null,
                 "defaultContent": ''
             },
             { 'data': 'descripcionPlanilla' }, //Columna 2: descripción de la planilla, esto viene de la petición que se hizo al servidor
             { 'data': 'frecuenciaDias' }, //Columna 3: frecuencia en días de la planilla, esto viene de la petición que se hizo al servidor
             {//Columna 4: los botones que tendrá cada fila, editar y detalles de la planilla
+                "orderable": false,
+                "data": null,
                 'defaultContent':
                     `
                         <button type="button" class="btn btn-primary btn-xs" id="btnEditarCatalogoDeducciones">Editar</button>
@@ -115,35 +148,41 @@ function listar() {
                     `
             }
         ],
-        "language": {   
-            "sProcessing":     spinner(),
-            "sLengthMenu":     "Mostrar _MENU_ registros",
-            "sZeroRecords":    "No se encontraron resultados",
-            "sEmptyTable":     "Ningún dato disponible en esta tabla",
-            "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix":    "",
-            "sSearch":         "Buscar:",
-            "sUrl":            "",
-            "sInfoThousands":  ",",
+        "language": {
+            "sProcessing": spinner(),
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
             "sLoadingRecords": spinner(),
             "oPaginate": {
-                "sFirst":    "Primero",
-                "sLast":     "Último",
-                "sNext":     "Siguiente",
-                "sPrevious": "Anterior"
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": '<img src = "' + urlProtocoloDominio + '/Content/img/flecha-derecha.svg' + '" width = "25px" height = "15px"/>',
+                "sPrevious": '<img src = "' + urlProtocoloDominio + '/Content/img/flecha-hacia-la-izquierda.svg' + '" width = "25px" height = "15px"/>'
             },
             "oAria": {
-                "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
                 "sSortDescending": ": Activar para ordenar la columna de manera descendente"
             }
-         },//Con esto se hace la traducción al español del datatables
+        },//Con esto se hace la traducción al español del datatables
         responsive: false,
         pageLength: 25,
         dom: '<"html5buttons"B>lTfgitp', //Darle los elementos del DOM que deseo
         buttons: [ //Poner los botones que quiero que aparezcan
-            { extend: 'copy' },
+            {
+                extend: 'copy',
+                title: 'Catalogo de Planillas',
+                exportOptions: {
+                    columns: [1, 2]
+                }
+            },
             {
                 extend: 'csv',
                 title: 'Catalogo de Planillas',
@@ -282,6 +321,46 @@ function obtenerDetalles(id, handleData) {
     );
 }
 
+//Cuando cargue entonces que liste los datos en la tabla
+$(document).ready(() => {
+    //Validar que no haya un /Index en la URL, si no falla el AJAX
+    let ubicacionIndexUrl = URLactual.indexOf('/Index');
+    let urlConSlash = URLactual.indexOf('CatalogoDePlanillas/');
+
+    if (ubicacionIndexUrl > 0) {
+        location.href = URLactual.replace('/Index', '');
+    }
+
+    // if (urlConSlash > 0) {
+    //     location.href = URLactual.replace('CatalogoDePlanillas/', 'CatalogoDePlanillas');
+    // }
+
+    if (getUrl.toString().indexOf('Create') < 1 && getUrl.toString().indexOf('Edit') < 1) {
+        listar();
+    }
+
+
+    //Validar la descripción de la planilla cuando se salga del input
+    inputDescripcionPlanilla.blur(function () {
+        if ($(this).val().trim() != "") {
+            validacionDescripcionPlanilla.hide();
+        } else {
+            validacionDescripcionPlanilla.show();
+        }
+    });
+
+    //Validar la frecuencia en dias cuando se salga del input
+    inputFrecuenciaEnDias.blur(function () {
+        if (inputFrecuenciaEnDias.val().trim() != "" && inputFrecuenciaEnDias.val() != "0" && inputFrecuenciaEnDias.val() > 0) {
+            validacionFrecuenciaDias.hide();
+        } else {
+            validacionFrecuenciaDias.show();
+        }
+    });
+
+
+});
+
 //Cuando de click en el botón de detalles
 $(document).on('click', 'td.details-control', function () {
     var tr = $(this).closest('tr');
@@ -316,7 +395,7 @@ if (getUrl.toString().indexOf('Create') > 1) {
 
 //Insetar
 $(document).on('click', '#btnGuardarCatalogoDePlanillasIngresosDeducciones', function () {
-    
+
     crearEditar();
 });
 
@@ -324,44 +403,6 @@ $(document).on('click', '#btnGuardarCatalogoDePlanillasIngresosDeducciones', fun
 $(document).on('click', '#btnEditarCatalogoDePlanillasIngresosDeducciones', function () {
     crearEditar(true);
 });
-
-
-//Para editar o insertar utilizare esta función, para validar los campos
-function verificarCampos(descripcionPlanilla, frecuenciaDias, catalogoIngresos, catalogoDeducciones) {
-    var todoBien = true;
-    //Validar que la descripción este bien
-    if (descripcionPlanilla == "") {
-        scrollArriba();
-        validacionDescripcionPlanilla.show();
-        todoBien = false;
-    } else
-        validacionDescripcionPlanilla.hide();
-    //Validar que la frecuencia en días esté bien
-    if (frecuenciaDias == "" || parseInt(frecuenciaDias) <= 0) {
-        scrollArriba();
-        validacionFrecuenciaDias.show();
-        todoBien = false;
-    } else
-        validacionFrecuenciaDias.hide();
-
-    //Validar que se haya seleccionado por lo menos un ingreso
-    if (catalogoIngresos.length == 0) {
-        scrollArriba();
-        validacionCatalogoIngresos.show();
-        todoBien = false;
-    } else
-        validacionCatalogoIngresos.hide();
-
-    //Validar qeu por lo meno se halla seleccionado una deducción
-    if (catalogoDeducciones.length == 0) {
-        scrollArriba();
-        validacionCatalogoDeducciones.show();
-        todoBien = false;
-    } else
-        validacionCatalogoDeducciones.hide();
-
-    return todoBien;
-}
 
 // Funcion para crear y editar
 var crearEditar = function (edit) {
@@ -505,27 +546,3 @@ $('#InactivarCatalogoDeducciones #btnInactivarPlanilla').click(() => {
         },
         enviar => { console.log('Enviando...'); });
 });
-
-function ocultarCargandoEditar() {
-    btnEditar.show();
-    cargandoEditar.html('');
-    cargandoEditar.hide();
-}
-
-function mostrarCargandoEditar() {
-    btnEditar.hide();
-    cargandoEditar.html(spinner());
-    cargandoEditar.show();
-}
-
-function mostrarCargandoCrear() {
-    btnGuardar.hide();
-    cargandoCrear.html(spinner());
-    cargandoCrear.show();
-}
-
-function ocultarCargandoCrear() {
-    btnGuardar.show();
-    cargandoCrear.html('');
-    cargandoCrear.hide();
-}

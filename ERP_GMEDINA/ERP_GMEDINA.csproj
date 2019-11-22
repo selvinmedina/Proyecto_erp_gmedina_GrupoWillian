@@ -669,6 +669,9 @@
     <Content Include="Content\img\email_1.jpg" />
     <Content Include="Content\img\email_2.jpg" />
     <Content Include="Content\img\email_3.jpg" />
+    <Content Include="Content\img\flecha-derecha.png" />
+    <Content Include="Content\img\flecha-derecha.svg" />
+    <Content Include="Content\img\flecha-hacia-la-izquierda.svg" />
     <Content Include="Content\img\full_height.jpg" />
     <Content Include="Content\img\header-profile-skin-1.png" />
     <Content Include="Content\img\header-profile-skin-2.png" />
@@ -1402,7 +1405,6 @@
     <Content Include="Views\TipoDeducciones\_CreateTipoDeduccion.cshtml" />
     <Content Include="Views\TipoDeducciones\_EditTipoDeduccion.cshtml" />
     <Content Include="Views\CatalogoDePlanillas\Create.cshtml" />
-    <Content Include="Views\CatalogoDePlanillas\Delete.cshtml" />
     <Content Include="Views\CatalogoDePlanillas\Details.cshtml" />
     <Content Include="Views\CatalogoDePlanillas\Edit.cshtml" />
     <Content Include="Views\CatalogoDePlanillas\Index.cshtml" />
