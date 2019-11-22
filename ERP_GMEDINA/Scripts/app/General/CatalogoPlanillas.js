@@ -115,7 +115,30 @@ function listar() {
                     `
             }
         ],
-        "language": { "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json" },//Con esto se hace la traducción al español del datatables
+        "language": {   
+            "sProcessing":     spinner(),
+            "sLengthMenu":     "Mostrar _MENU_ registros",
+            "sZeroRecords":    "No se encontraron resultados",
+            "sEmptyTable":     "Ningún dato disponible en esta tabla",
+            "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix":    "",
+            "sSearch":         "Buscar:",
+            "sUrl":            "",
+            "sInfoThousands":  ",",
+            "sLoadingRecords": spinner(),
+            "oPaginate": {
+                "sFirst":    "Primero",
+                "sLast":     "Último",
+                "sNext":     "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+         },//Con esto se hace la traducción al español del datatables
         responsive: false,
         pageLength: 25,
         dom: '<"html5buttons"B>lTfgitp', //Darle los elementos del DOM que deseo
@@ -142,7 +165,6 @@ function listar() {
                     columns: [1, 2]
                 }
             },
-
             {
                 extend: 'print',
                 title: 'Catalogo de Planillas',
@@ -294,12 +316,13 @@ if (getUrl.toString().indexOf('Create') > 1) {
 
 //Insetar
 $(document).on('click', '#btnGuardarCatalogoDePlanillasIngresosDeducciones', function () {
+    
     crearEditar();
 });
 
 //Editar
 $(document).on('click', '#btnEditarCatalogoDePlanillasIngresosDeducciones', function () {
-    crearEditar('edit');
+    crearEditar(true);
 });
 
 
@@ -393,9 +416,7 @@ var crearEditar = function (edit) {
     //Insertar o editar
     if (verificarCampos(descripcionPlanilla, frecuenciaDias, arrayIngresos, arrayDeducciones)) {
         if (!edit) {
-            btnGuardar.hide();
-            cargandoCrear.html(spinner());
-            cargandoCrear.show();
+            mostrarCargandoCrear();
 
             _ajax({
                 catalogoDePlanillas: [
@@ -420,17 +441,13 @@ var crearEditar = function (edit) {
                             message: 'Hubo un error al insertar el registro',
                         });
 
-                        btnGuardar.show();
-                        cargandoCrear.html('');
-                        cargandoCrear.hide();
+                        ocultarCargandoCrear();
                     }
                 },
                 enviar => { });
         }
         else {
-            btnEditar.hide();
-            cargandoEditar.html(spinner());
-            cargandoEditar.show();
+            mostrarCargandoEditar();
             _ajax({
                 id: idPlanilla,
                 catalogoDePlanillas: [
@@ -454,9 +471,7 @@ var crearEditar = function (edit) {
                             title: 'Error',
                             message: 'Hubo un error al editar el registro',
                         });
-                        btnEditar.show();
-                        cargandoEditar.html('');
-                        cargandoEditar.hide();
+                        ocultarCargandoEditar();
                     }
                 },
                 enviar => { });
@@ -490,3 +505,27 @@ $('#InactivarCatalogoDeducciones #btnInactivarPlanilla').click(() => {
         },
         enviar => { console.log('Enviando...'); });
 });
+
+function ocultarCargandoEditar() {
+    btnEditar.show();
+    cargandoEditar.html('');
+    cargandoEditar.hide();
+}
+
+function mostrarCargandoEditar() {
+    btnEditar.hide();
+    cargandoEditar.html(spinner());
+    cargandoEditar.show();
+}
+
+function mostrarCargandoCrear() {
+    btnGuardar.hide();
+    cargandoCrear.html(spinner());
+    cargandoCrear.show();
+}
+
+function ocultarCargandoCrear() {
+    btnGuardar.show();
+    cargandoCrear.html('');
+    cargandoCrear.hide();
+}
