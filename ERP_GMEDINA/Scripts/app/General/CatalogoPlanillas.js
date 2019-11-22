@@ -1,3 +1,27 @@
+//Declaracion de variables
+
+//Obtener las URL
+var pathname = window.location.pathname + '/',
+    URLactual = window.location.toString(),
+    getUrl = window.location,
+    baseUrl = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1],
+    table;//Almacenar la tabla
+
+
+//Constantes
+const btnGuardar = $('#btnGuardarCatalogoDePlanillasIngresosDeducciones'), //Boton para guardar el catalogo de planilla con sus detalles
+    btnEditar = $('#btnEditarCatalogoDePlanillasIngresosDeducciones'), //Boton para editar editar el catalogo de planilla con sus detalles
+    validacionDescripcionPlanilla = $('#validacionDescripcionPlanilla'), //Mensaje de validacion para la descripcion de la planilla
+    validacionFrecuenciaDias = $('#validacionFrecuenciaDias'), //Mensaje de validación para la frecuencia en días
+    validacionCatalogoIngresos = $('#catalogoDeIngresos #validacionCatalogoIngresos'), //Mensaje de validación de los ingresos
+    htmlBody = $('html, body'), //Seleccionar el HTML y el body
+    validacionCatalogoDeducciones = $('#catalogoDeDeducciones #validacionCatalogoDeducciones'), //Mensaje de validación de las deducciones
+    inputDescripcionPlanilla = $('#cpla_DescripcionPlanilla'), //Seleccionar la descripción de la planilla
+    inputFrecuenciaEnDias = $('#cpla_FrecuenciaEnDias'), //Seleccionar el campo de frecuencia en días
+    inputIdPlanilla = $('form #cpla_IdPlanilla'), //Seleccionar el id de la planilla (esta oculto)
+    cargandoCrear = $('#cargandoCrear'), //Div que aparecera cuando se le de click en crear
+    cargandoEditar = $('#cargandoEditar'); //Div que aparecera cuando se de click en editar
+//Funciones
 //Funcion generica para reutilizar AJAX
 function _ajax(params, uri, type, callback, enviar) {
     $.ajax({
@@ -15,13 +39,21 @@ function _ajax(params, uri, type, callback, enviar) {
     });
 }
 
-//Obtener las URL
-var pathname = window.location.pathname + '/';
-var URLactual = window.location.toString();
-var getUrl = window.location
-var baseUrl = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
-//Almacenar la tabla
-var table;
+//Mostrar el spinner
+function spinner() {
+    return `<div class="sk-spinner sk-spinner-wave">
+                <div class="sk-rect1"></div>
+                <div class="sk-rect2"></div>
+                <div class="sk-rect3"></div>
+                <div class="sk-rect4"></div>
+                <div class="sk-rect5"></div>
+             </div>`
+}
+
+//Posicionaarse en la parte superior de la pagina cuando falle una validación
+function scrollArriba() {
+    htmlBody.animate({ scrollTop: 60 }, 300);
+}
 
 //Cuando cargue entonces que liste los datos en la tabla
 $(document).ready(() => {
@@ -29,25 +61,32 @@ $(document).ready(() => {
         listar();
     }
 
-    $('#cpla_DescripcionPlanilla').blur(function () {
+    //Validar que no haya un /Index en la URL, si no falla el AJAX
+    let ubicacionIndexUrl = URLactual.indexOf('/Index');
+    if (ubicacionIndexUrl > 0) {
+        location.href = URLactual.replace('/Index', '');
+    }
+
+    //Validar la descripción de la planilla cuando se salga del input
+    inputDescripcionPlanilla.blur(function () {
         if ($(this).val() != "") {
-            $('#validacionDescripcionPlanilla').hide();
+            validacionDescripcionPlanilla.hide();
         } else {
-            $('#validacionDescripcionPlanilla').show();
+            validacionDescripcionPlanilla.show();
         }
     });
 
-    $('#cpla_FrecuenciaEnDias').blur(function () {
-        if ($('#cpla_FrecuenciaEnDias').val() != "" && $('#cpla_FrecuenciaEnDias').val() >= 0) {
-            $('#validacionFrecuenciaDias').hide();
+    //Validar la frecuencia en dias cuando se salga del input
+    inputFrecuenciaEnDias.blur(function () {
+        if (inputFrecuenciaEnDias.val() != "" && inputFrecuenciaEnDias.val() != "0" && inputFrecuenciaEnDias.val() > 0) {
+            validacionFrecuenciaDias.hide();
         } else {
-            $('#validacionFrecuenciaDias').show();
+            validacionFrecuenciaDias.show();
         }
     });
 
 
 });
-
 //Datatables
 function listar() {
     //Almacenar la tabla creada
@@ -82,12 +121,34 @@ function listar() {
         dom: '<"html5buttons"B>lTfgitp', //Darle los elementos del DOM que deseo
         buttons: [ //Poner los botones que quiero que aparezcan
             { extend: 'copy' },
-            { extend: 'csv' },
-            { extend: 'excel', title: 'ExampleFile' },
-            { extend: 'pdf', title: 'ExampleFile' },
+            {
+                extend: 'csv',
+                title: 'Catalogo de Planillas',
+                exportOptions: {
+                    columns: [1, 2]
+                }
+            },
+            {
+                extend: 'excelHtml5',
+                title: 'Catalogo de Planillas',
+                exportOptions: {
+                    columns: [1, 2]
+                }
+            },
+            {
+                extend: 'pdfHtml5',
+                title: 'Catalogo de Planillas',
+                exportOptions: {
+                    columns: [1, 2]
+                }
+            },
 
             {
                 extend: 'print',
+                title: 'Catalogo de Planillas',
+                exportOptions: {
+                    columns: [1, 2]
+                },
                 customize: function (win) {
                     $(win.document.body).addClass('white-bg');
                     $(win.document.body).css('font-size', '10px');
@@ -185,6 +246,7 @@ function getDeducciones(data) {
             </table>
         </div>
     </div>`;
+
     return deduccionesPlanilla;
 }
 
@@ -194,7 +256,7 @@ function obtenerDetalles(id, handleData) {
         '/CatalogoDePlanillas/getDeduccionIngresos/' + id,
         'GET',
         data => handleData(data),
-        () => { console.log('Enviando...'); }
+        () => { }
     );
 }
 
@@ -209,12 +271,16 @@ $(document).on('click', 'td.details-control', function () {
         row.child.hide();
         tr.removeClass('shown');
     } else { //Que desplegue el detalle
+        row.child([spinner()]).show();
+        tr.addClass('shown');
+
         // Obtener los datos para el detalle
         obtenerDetalles(row.data().idPlanilla, (data) => {
             //Mostrar el detalle con sus datos
             row.child([getIngresos(data) + getDeducciones(data)]).show();
             tr.addClass('shown');
-        });
+        },
+            () => { });
     }
 });
 
@@ -222,8 +288,8 @@ $(document).on('click', 'td.details-control', function () {
 // Si esta en la pantalla de Create entonces vaciar todo
 if (getUrl.toString().indexOf('Create') > 1) {
     $('input[type="checkbox"]').prop("checked", false);
-    $('#cpla_DescripcionPlanilla').val('');
-    $('#cpla_FrecuenciaEnDias').val('')
+    inputDescripcionPlanilla.val('');
+    inputFrecuenciaEnDias.val('')
 }
 
 //Insetar
@@ -236,40 +302,40 @@ $(document).on('click', '#btnEditarCatalogoDePlanillasIngresosDeducciones', func
     crearEditar('edit');
 });
 
-$('')
 
 //Para editar o insertar utilizare esta función, para validar los campos
 function verificarCampos(descripcionPlanilla, frecuenciaDias, catalogoIngresos, catalogoDeducciones) {
     var todoBien = true;
     //Validar que la descripción este bien
     if (descripcionPlanilla == "") {
-        $('html, body').animate({ scrollTop: 200 }, 600);
-        $('#validacionDescripcionPlanilla').show();
+        scrollArriba();
+        validacionDescripcionPlanilla.show();
         todoBien = false;
     } else
-        $('#validacionDescripcionPlanilla').hide();
+        validacionDescripcionPlanilla.hide();
     //Validar que la frecuencia en días esté bien
     if (frecuenciaDias == "" || parseInt(frecuenciaDias) <= 0) {
-        $('html, body').animate({ scrollTop: 200 }, 600);
-        $('#validacionFrecuenciaDias').show();
+        scrollArriba();
+        validacionFrecuenciaDias.show();
         todoBien = false;
     } else
-        $('#validacionFrecuenciaDias').hide();
+        validacionFrecuenciaDias.hide();
 
     //Validar que se haya seleccionado por lo menos un ingreso
     if (catalogoIngresos.length == 0) {
-        $('html, body').animate({ scrollTop: 200 }, 600);
-        $('#catalogoDeIngresos #validacionCatalogoIngresos').show();
+        scrollArriba();
+        validacionCatalogoIngresos.show();
         todoBien = false;
     } else
-        $('#catalogoDeIngresos #validacionCatalogoIngresos').hide();
+        validacionCatalogoIngresos.hide();
 
+    //Validar qeu por lo meno se halla seleccionado una deducción
     if (catalogoDeducciones.length == 0) {
-        $('html, body').animate({ scrollTop: 200 }, 600);
-        $('#catalogoDeDeducciones #validacionCatalogoDeducciones').show();
+        scrollArriba();
+        validacionCatalogoDeducciones.show();
         todoBien = false;
     } else
-        $('#catalogoDeDeducciones #validacionCatalogoDeducciones').hide();
+        validacionCatalogoDeducciones.hide();
 
     return todoBien;
 }
@@ -280,9 +346,9 @@ var crearEditar = function (edit) {
     var arrayIngresos = [];
     var arrayDeducciones = [];
     //Obtener los valores del catalogo de planillas
-    var descripcionPlanilla = $('#cpla_DescripcionPlanilla').val();
-    var frecuenciaDias = $('#cpla_FrecuenciaEnDias').val();
-    var idPlanilla = $('form #cpla_IdPlanilla').val();
+    var descripcionPlanilla = inputDescripcionPlanilla.val();
+    var frecuenciaDias = inputFrecuenciaEnDias.val();
+    var idPlanilla = inputIdPlanilla.val();
     //Obtener las lista del catalogo de ingresos
     $('#catalogoDeIngresos input[type="checkbox"]').each(function (index, val) {
 
@@ -326,7 +392,11 @@ var crearEditar = function (edit) {
 
     //Insertar o editar
     if (verificarCampos(descripcionPlanilla, frecuenciaDias, arrayIngresos, arrayDeducciones)) {
-        if (edit != 'edit')
+        if (!edit) {
+            btnGuardar.hide();
+            cargandoCrear.html(spinner());
+            cargandoCrear.show();
+
             _ajax({
                 catalogoDePlanillas: [
                     descripcionPlanilla, frecuenciaDias
@@ -344,14 +414,23 @@ var crearEditar = function (edit) {
                         });
                         location.href = baseUrl;
                     }
-                    else
+                    else {
                         iziToast.error({
                             title: 'Error',
                             message: 'Hubo un error al insertar el registro',
                         });
+
+                        btnGuardar.show();
+                        cargandoCrear.html('');
+                        cargandoCrear.hide();
+                    }
                 },
-                enviar => { console.log('Enviando...') });
-        else
+                enviar => { });
+        }
+        else {
+            btnEditar.hide();
+            cargandoEditar.html(spinner());
+            cargandoEditar.show();
             _ajax({
                 id: idPlanilla,
                 catalogoDePlanillas: [
@@ -370,13 +449,18 @@ var crearEditar = function (edit) {
                         });
                         location.href = baseUrl;
                     }
-                    else
+                    else {
                         iziToast.error({
                             title: 'Error',
                             message: 'Hubo un error al editar el registro',
                         });
+                        btnEditar.show();
+                        cargandoEditar.html('');
+                        cargandoEditar.hide();
+                    }
                 },
-                enviar => console.log('Enviando...'));
+                enviar => { });
+        }
     }
 }
 
@@ -386,7 +470,7 @@ $('#inactivar').click(() => {
 });
 
 $('#InactivarCatalogoDeducciones #btnInactivarPlanilla').click(() => {
-    var id = $('form #cpla_IdPlanilla').val();
+    var id = inputIdPlanilla.val();
     _ajax({ id: id },
         '/CatalogoDePlanillas/Delete',
         'POST',

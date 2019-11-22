@@ -6,83 +6,83 @@
 }
 
 <div class="col-lg-12">
-<div class="ibox float-e-margins">
-<div class="ibox-title">
-	@Html.ActionLink("Regresar", "Index", null, new {@class="pull-right" })
-	<h2>Details</h2>
-</div>
+    <div class="ibox float-e-margins">
+        <div class="ibox-title">
+            @Html.ActionLink("Regresar", "Index", null, new { @class = "pull-right" })
+            <h2>Details</h2>
+        </div>
 
-<div class="ibox-content">
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.cde_DescripcionDeduccion)
-        </dt>
+        <div class="ibox-content">
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.cde_DescripcionDeduccion)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.cde_DescripcionDeduccion)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.cde_DescripcionDeduccion)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.cde_PorcentajeColaborador)
-        </dt>
+                <dt>
+                    @Html.DisplayNameFor(model => model.cde_PorcentajeColaborador)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.cde_PorcentajeColaborador)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.cde_PorcentajeColaborador)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.cde_PorcentajeEmpresa)
-        </dt>
+                <dt>
+                    @Html.DisplayNameFor(model => model.cde_PorcentajeEmpresa)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.cde_PorcentajeEmpresa)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.cde_PorcentajeEmpresa)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.cde_UsuarioCrea)
-        </dt>
+                <dt>
+                    @Html.DisplayNameFor(model => model.cde_UsuarioCrea)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.cde_UsuarioCrea)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.cde_UsuarioCrea)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.cde_FechaCrea)
-        </dt>
+                <dt>
+                    @Html.DisplayNameFor(model => model.cde_FechaCrea)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.cde_FechaCrea)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.cde_FechaCrea)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.cde_UsuarioModifica)
-        </dt>
+                <dt>
+                    @Html.DisplayNameFor(model => model.cde_UsuarioModifica)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.cde_UsuarioModifica)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.cde_UsuarioModifica)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.cde_FechaModifica)
-        </dt>
+                <dt>
+                    @Html.DisplayNameFor(model => model.cde_FechaModifica)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.cde_FechaModifica)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.cde_FechaModifica)
+                </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.tbTipoDeduccion.tde_Descripcion)
-        </dt>
+                <dt>
+                    @Html.DisplayNameFor(model => model.tbTipoDeduccion.tde_Descripcion)
+                </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.tbTipoDeduccion.tde_Descripcion)
-        </dd>
+                <dd>
+                    @Html.DisplayFor(model => model.tbTipoDeduccion.tde_Descripcion)
+                </dd>
 
-    </dl>
-<p>
-    @Html.ActionLink("Editar", "Edit", new { id = Model.cde_IdDeducciones }, new {@class="btn btn-primary" }) 
-    @Html.ActionLink("Cancelar", "Index", null, new {@class="btn btn-default" })
-</p>
-</div>
-</div>
+            </dl>
+            <p>
+                @Html.ActionLink("Editar", "Edit", new { id = Model.cde_IdDeducciones }, new { @class = "btn btn-primary" })
+                @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default" })
+            </p>
+        </div>
+    </div>
 </div>

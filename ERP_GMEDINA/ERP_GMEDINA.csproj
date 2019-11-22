@@ -1108,6 +1108,7 @@
     <Content Include="Scripts\plugins\d3\d3.min.js" />
     <Content Include="Scripts\plugins\datamaps\datamaps.all.min.js" />
     <Content Include="Scripts\plugins\datapicker\bootstrap-datepicker.js" />
+    <Content Include="Scripts\plugins\dataTables\colvis.min.js" />
     <Content Include="Scripts\plugins\dataTables\datatables.min.js" />
     <Content Include="Scripts\plugins\dataTables\DatatablesConfigurations.js" />
     <Content Include="Scripts\plugins\daterangepicker\daterangepicker.js" />
@@ -1280,6 +1281,7 @@
     <Content Include="Scripts\plugins\jquery-ui\jquery-ui.js" />
     <Content Include="Scripts\plugins\jquery-ui\jquery-ui.min.css" />
     <Content Include="Scripts\plugins\jquery-ui\jquery-ui.min.js" />
+    <Content Include="Scripts\plugins\jquery\jquery-3.3.1.js" />
     <Content Include="Scripts\plugins\jsKnob\jquery.knob.js" />
     <Content Include="Scripts\plugins\jsTree\jstree.min.js" />
     <Content Include="Scripts\plugins\justified-gallery\jquery.justifiedgallery.css" />
@@ -1324,6 +1326,7 @@
     <Content Include="Scripts\plugins\velocity\velocity.min.js" />
     <Content Include="Scripts\plugins\velocity\velocity.ui.min.js" />
     <Content Include="Scripts\plugins\video\responsible-video.js" />
+    <Content Include="Scripts\plugins\dataTables\datatables1.10.20" />
     <None Include="Scripts\Scripts_Base\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\Scripts_Base\jquery-3.3.1.js" />
     <Content Include="Scripts\Scripts_Base\jquery-3.3.1.min.js" />
