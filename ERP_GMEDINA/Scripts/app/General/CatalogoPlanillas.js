@@ -1,5 +1,4 @@
-//Declaracion de variables
-
+//#region Variables
 //Obtener las URL
 var pathname = window.location.pathname + '/',
     URLactual = window.location.toString(),
@@ -20,8 +19,11 @@ const btnGuardar = $('#btnGuardarCatalogoDePlanillasIngresosDeducciones'), //Bot
     inputFrecuenciaEnDias = $('#cpla_FrecuenciaEnDias'), //Seleccionar el campo de frecuencia en días
     inputIdPlanilla = $('form #cpla_IdPlanilla'), //Seleccionar el id de la planilla (esta oculto)
     cargandoCrear = $('#cargandoCrear'), //Div que aparecera cuando se le de click en crear
-    cargandoEditar = $('#cargandoEditar'); //Div que aparecera cuando se de click en editar
-//Funciones
+    cargandoEditar = $('#cargandoEditar'), //Div que aparecera cuando se de click en editar
+    elementsSwitch = Array.prototype.slice.call(document.querySelectorAll('.js-switch'));
+//#endregion
+
+//#region Funciones
 //Funcion generica para reutilizar AJAX
 function _ajax(params, uri, type, callback, enviar) {
     $.ajax({
@@ -39,6 +41,164 @@ function _ajax(params, uri, type, callback, enviar) {
     });
 }
 
+// Funcion para crear y editar
+var crearEditar = function (edit) {
+    //Array de Ingresos y deducciones
+    var arrayIngresos = [];
+    var arrayDeducciones = [];
+    //Obtener los valores del catalogo de planillas
+    var descripcionPlanilla = inputDescripcionPlanilla.val();
+    var frecuenciaDias = inputFrecuenciaEnDias.val();
+    var idPlanilla = inputIdPlanilla.val();
+
+    //Obtener las lista del catalogo de ingresos
+    listaCatalogoIngresos(arrayIngresos);
+
+    //Obtener las lista del catalogo de deducciones
+    listaCatalogoDeducciones(arrayDeducciones);
+
+    //Insertar o editar
+    if (verificarCampos(descripcionPlanilla, frecuenciaDias, arrayIngresos, arrayDeducciones)) {
+        if (!edit) {
+            mostrarCargandoCrear();
+
+            _ajax({
+                catalogoDePlanillas: [
+                    descripcionPlanilla, frecuenciaDias
+                ],
+                catalogoIngresos: arrayIngresos,
+                catalogoDeducciones: arrayDeducciones
+            },
+                "/CatalogoDePlanillas/Create",
+                "POST",
+                (data) => {
+                    if (data == "bien") {
+                        iziToast.success({
+                            title: 'Exito',
+                            message: 'El registro fue insertado de forma exitosa.',
+                        });
+                        location.href = baseUrl;
+                    }
+                    else {
+                        iziToast.error({
+                            title: 'Error',
+                            message: 'Hubo un error al insertar el registro',
+                        });
+
+                        ocultarCargandoCrear();
+                    }
+                },
+                enviar => { });
+        }
+        else {
+            mostrarCargandoEditar();
+            _ajax({
+                id: idPlanilla,
+                catalogoDePlanillas: [
+                    descripcionPlanilla, frecuenciaDias
+                ],
+                catalogoIngresos: arrayIngresos,
+                catalogoDeducciones: arrayDeducciones
+            },
+                "/CatalogoDePlanillas/Edit",
+                "POST",
+                (data) => {
+                    if (data == "bien") {
+                        iziToast.success({
+                            title: 'Exito',
+                            message: 'El registro fue editado de forma exitosa.',
+                        });
+                        location.href = baseUrl;
+                    }
+                    else {
+                        iziToast.error({
+                            title: 'Error',
+                            message: 'Hubo un error al editar el registro',
+                        });
+                        ocultarCargandoEditar();
+                    }
+                },
+                enviar => { });
+        }
+    }
+}
+
+function listaCatalogoDeducciones(arrayDeducciones) {
+    $('#catalogoDeDeducciones input[type="checkbox"].i-checks').each(function (index, val) {
+        //Obtener el atributo id del ckeckbox
+        let checkIdDedu = $(val).attr('id');
+        //Separar el id por el caracter "-"
+        let arrDedu = checkIdDedu.split('-');
+        //Obtener el id del checkbox para identificar el id de los ingresos a guardar
+        let currentCheckboxIdDedu = arrDedu[1];
+        //Ver si esta chequeado o no para guardar solo los que esten chequeados
+        let isCheckedDedu = $('#catalogoDeDeducciones #check-' + currentCheckboxIdDedu).is(':checked', true);
+        //Agregar a la lista de
+        if (isCheckedDedu === true) {
+            arrayDeducciones.push(currentCheckboxIdDedu);
+        }
+    });
+}
+
+function listaCatalogoIngresos(arrayIngresos) {
+    $('#catalogoDeIngresos input[type="checkbox"].i-checks').each(function (index, val) {
+        //Obtener el atributo id del ckeckbox
+        let checkId = $(val).attr('id');
+        //Separar el id por el caracter "-"
+        let arr = checkId.split('-');
+        //Obtener el id del checkbox para identificar el id de los ingresos a guardar
+        let currentCheckboxIdIngreso = arr[1];
+        //Ver si esta chequeado o no para guardar solo los que esten chequeados
+        let isChecked = $('#catalogoDeIngresos #check-' + currentCheckboxIdIngreso).is(':checked', true);
+
+        //Agregar a la lista de ingresos
+        if (isChecked) {
+            arrayIngresos.push(currentCheckboxIdIngreso);
+        }
+    });
+}
+
+function listaCatalogoDeduccionesFalse() {
+    var hayUnoFalso = true;
+    $('#catalogoDeDeducciones input[type="checkbox"].i-checks').each(function (index, val) {
+        //Obtener el atributo id del ckeckbox
+        let checkIdDedu = $(val).attr('id');
+        //Separar el id por el caracter "-"
+        let arrDedu = checkIdDedu.split('-');
+        //Obtener el id del checkbox para identificar el id de los ingresos a guardar
+        let currentCheckboxIdDedu = arrDedu[1];
+        //Ver si esta chequeado o no para guardar solo los que esten chequeados
+        let isCheckedDedu = $('#catalogoDeDeducciones #check-' + currentCheckboxIdDedu).prop("checked");
+        //Agregar a la lista de
+        if (!isCheckedDedu) {
+            hayUnoFalso = false;
+            return;
+        }
+    });
+    return hayUnoFalso;
+}
+
+function listaCatalogoIngresosFalse() {
+    var hayUnoFalso = true;
+    $('#catalogoDeIngresos input[type="checkbox"].i-checks').each(function (index, val) {
+        //Obtener el atributo id del ckeckbox
+        let checkId = $(val).attr('id');
+        //Separar el id por el caracter "-"
+        let arr = checkId.split('-');
+        //Obtener el id del checkbox para identificar el id de los ingresos a guardar
+        let currentCheckboxIdIngreso = arr[1];
+        //Ver si esta chequeado o no para guardar solo los que esten chequeados
+        let isChecked = $('#catalogoDeIngresos #check-' + currentCheckboxIdIngreso).prop("checked");
+
+        //Agregar a la lista de ingresos
+        if (!isChecked) {
+            hayUnoFalso = false;
+            return;
+        }
+    });
+    return hayUnoFalso;
+}
+
 //Mostrar el spinner
 function spinner() {
     return `<div class="sk-spinner sk-spinner-wave">
@@ -48,6 +208,14 @@ function spinner() {
                 <div class="sk-rect4"></div>
                 <div class="sk-rect5"></div>
              </div>`
+}
+
+function estaEnCrear() {
+    return getUrl.toString().indexOf('Create');
+}
+
+function estaEnEditar() {
+    return getUrl.toString().indexOf('Edit');
 }
 
 //Posicionaarse en la parte superior de la pagina cuando falle una validación
@@ -100,23 +268,22 @@ function verificarCampos(descripcionPlanilla, frecuenciaDias, catalogoIngresos, 
     //Validar que se haya seleccionado por lo menos un ingreso
     if (catalogoIngresos.length == 0) {
         scrollArriba();
-        validacionCatalogoIngresos.show();
+        validacionCatalogoIngresos.parent().show();
         todoBien = false;
-    } else
-        validacionCatalogoIngresos.hide();
+    } else {
+        validacionCatalogoIngresos.parent().hide();
+    }
 
     //Validar qeu por lo meno se halla seleccionado una deducción
     if (catalogoDeducciones.length == 0) {
         scrollArriba();
-        validacionCatalogoDeducciones.show();
+        validacionCatalogoDeducciones.parent().show();
         todoBien = false;
     } else
-        validacionCatalogoDeducciones.hide();
+        validacionCatalogoDeducciones.parent().hide();
 
     return todoBien;
 }
-
-console.log(urlProtocoloDominio + '/Content/img/flecha-derecha.png');
 
 //Datatables
 function listar() {
@@ -320,8 +487,8 @@ function obtenerDetalles(id, handleData) {
         () => { }
     );
 }
+//#endregion
 
-//Cuando cargue entonces que liste los datos en la tabla
 $(document).ready(() => {
     //Validar que no haya un /Index en la URL, si no falla el AJAX
     let ubicacionIndexUrl = URLactual.indexOf('/Index');
@@ -331,14 +498,69 @@ $(document).ready(() => {
         location.href = URLactual.replace('/Index', '');
     }
 
-    // if (urlConSlash > 0) {
-    //     location.href = URLactual.replace('CatalogoDePlanillas/', 'CatalogoDePlanillas');
-    // }
-
-    if (getUrl.toString().indexOf('Create') < 1 && getUrl.toString().indexOf('Edit') < 1) {
+    if (estaEnCrear() < 1 && estaEnEditar() < 1) {
         listar();
+    } else {
+        const catalogoIngresosInputs = $("#catalogoDeIngresos input.i-checks");
+        const catalogoDeduccionesInputs = $("#catalogoDeDeducciones input.i-checks");
+
+        $('.i-checks').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
+        });
+
+        if (listaCatalogoIngresosFalse()) {
+            $('#checkSeleccionarTodosIngresos').prop('checked', true);
+        }
+
+        if (listaCatalogoDeduccionesFalse()) {
+            $('#checkSeleccionarTodasDeducciones').prop('checked', true);
+        }
+
+        elementsSwitch.forEach(function (html) {
+            var switchery = new Switchery(html,
+                {
+                    color: '#18a689',
+                    jackColor: '#fff',
+                    size: 'small',
+                    disabled: true
+                });
+        });
+
+        var catalogoIngresosChangeCheckbox = document.querySelector('#catalogoDeIngresos .js-check-change');
+        var catalogoDeduccionesChangeCheckbox = document.querySelector('#catalogoDeDeducciones .js-check-change');
+
+        catalogoIngresosChangeCheckbox.onchange = function () {
+            const seleccionarTodosLosIngresos = $('#seleccionarTodosLosIngresos');
+            let seleccionarDeseleccionar = seleccionarTodosLosIngresos.html();
+            if (catalogoIngresosChangeCheckbox.checked) {
+                catalogoIngresosInputs.iCheck('check');
+                seleccionarTodosLosIngresos.html(seleccionarDeseleccionar.replace('Seleccionar', 'Deseleccionar'));
+            } else {
+                catalogoIngresosInputs.iCheck('uncheck');
+                seleccionarTodosLosIngresos.html(seleccionarDeseleccionar.replace('Deseleccionar', 'Seleccionar'));
+            }
+        };
+
+        catalogoDeduccionesChangeCheckbox.onchange = function () {
+            const seleccionarTodasLasDeducciones = $('#seleccionarTodasLasDeducciones');
+            let seleccionarDeseleccionar = seleccionarTodasLasDeducciones.html();
+            if (catalogoDeduccionesChangeCheckbox.checked) {
+                catalogoDeduccionesInputs.iCheck('check');
+                seleccionarTodasLasDeducciones.html(seleccionarDeseleccionar.replace('Seleccionar', 'Deseleccionar'));
+            } else {
+                seleccionarTodasLasDeducciones.html(seleccionarDeseleccionar.replace('Deseleccionar', 'Seleccionar'));
+                catalogoDeduccionesInputs.iCheck('uncheck');
+            }
+        };
     }
 
+    // Si esta en la pantalla de Create entonces vaciar todo
+    if (estaEnCrear > 1) {
+        $('input[type="checkbox"]').prop("checked", false);
+        inputDescripcionPlanilla.val('');
+        inputFrecuenciaEnDias.val('')
+    }
 
     //Validar la descripción de la planilla cuando se salga del input
     inputDescripcionPlanilla.blur(function () {
@@ -361,6 +583,7 @@ $(document).ready(() => {
 
 });
 
+//#region CRUD
 //Cuando de click en el botón de detalles
 $(document).on('click', 'td.details-control', function () {
     var tr = $(this).closest('tr');
@@ -385,17 +608,8 @@ $(document).on('click', 'td.details-control', function () {
     }
 });
 
-//Insertar, editar y eliminar
-// Si esta en la pantalla de Create entonces vaciar todo
-if (getUrl.toString().indexOf('Create') > 1) {
-    $('input[type="checkbox"]').prop("checked", false);
-    inputDescripcionPlanilla.val('');
-    inputFrecuenciaEnDias.val('')
-}
-
 //Insetar
 $(document).on('click', '#btnGuardarCatalogoDePlanillasIngresosDeducciones', function () {
-
     crearEditar();
 });
 
@@ -403,122 +617,6 @@ $(document).on('click', '#btnGuardarCatalogoDePlanillasIngresosDeducciones', fun
 $(document).on('click', '#btnEditarCatalogoDePlanillasIngresosDeducciones', function () {
     crearEditar(true);
 });
-
-// Funcion para crear y editar
-var crearEditar = function (edit) {
-    //Array de Ingresos y deducciones
-    var arrayIngresos = [];
-    var arrayDeducciones = [];
-    //Obtener los valores del catalogo de planillas
-    var descripcionPlanilla = inputDescripcionPlanilla.val();
-    var frecuenciaDias = inputFrecuenciaEnDias.val();
-    var idPlanilla = inputIdPlanilla.val();
-    //Obtener las lista del catalogo de ingresos
-    $('#catalogoDeIngresos input[type="checkbox"]').each(function (index, val) {
-
-        //Obtener el atributo id del ckeckbox
-        let checkId = $(val).attr('id');
-
-        //Separar el id por el caracter "-"
-        let arr = checkId.split('-');
-
-        //Obtener el id del checkbox para identificar el id de los ingresos a guardar
-        let currentCheckboxIdIngreso = arr[1];
-
-        //Ver si esta chequeado o no para guardar solo los que esten chequeados
-        let isChecked = $('#catalogoDeIngresos #check-' + currentCheckboxIdIngreso).is(':checked', true);
-
-        //Agregar a la lista de ingresos
-        if (isChecked) {
-            arrayIngresos.push(currentCheckboxIdIngreso);
-        }
-    });
-
-    //Obtener las lista del catalogo de deducciones
-    $('#catalogoDeDeducciones input[type="checkbox"]').each(function (index, val) {
-        //Obtener el atributo id del ckeckbox
-        let checkIdDedu = $(val).attr('id');
-
-        //Separar el id por el caracter "-"
-        let arrDedu = checkIdDedu.split('-');
-
-        //Obtener el id del checkbox para identificar el id de los ingresos a guardar
-        let currentCheckboxIdDedu = arrDedu[1];
-
-        //Ver si esta chequeado o no para guardar solo los que esten chequeados
-        let isCheckedDedu = $('#catalogoDeDeducciones #check-' + currentCheckboxIdDedu).is(':checked', true);
-
-        //Agregar a la lista de
-        if (isCheckedDedu === true) {
-            arrayDeducciones.push(currentCheckboxIdDedu);
-        }
-    });
-
-    //Insertar o editar
-    if (verificarCampos(descripcionPlanilla, frecuenciaDias, arrayIngresos, arrayDeducciones)) {
-        if (!edit) {
-            mostrarCargandoCrear();
-
-            _ajax({
-                catalogoDePlanillas: [
-                    descripcionPlanilla, frecuenciaDias
-                ],
-                catalogoIngresos: arrayIngresos,
-                catalogoDeducciones: arrayDeducciones
-            },
-                "/CatalogoDePlanillas/Create",
-                "POST",
-                (data) => {
-                    if (data == "bien") {
-                        iziToast.success({
-                            title: 'Exito',
-                            message: 'El registro fue insertado de forma exitosa.',
-                        });
-                        location.href = baseUrl;
-                    }
-                    else {
-                        iziToast.error({
-                            title: 'Error',
-                            message: 'Hubo un error al insertar el registro',
-                        });
-
-                        ocultarCargandoCrear();
-                    }
-                },
-                enviar => { });
-        }
-        else {
-            mostrarCargandoEditar();
-            _ajax({
-                id: idPlanilla,
-                catalogoDePlanillas: [
-                    descripcionPlanilla, frecuenciaDias
-                ],
-                catalogoIngresos: arrayIngresos,
-                catalogoDeducciones: arrayDeducciones
-            },
-                "/CatalogoDePlanillas/Edit",
-                "POST",
-                (data) => {
-                    if (data == "bien") {
-                        iziToast.success({
-                            title: 'Exito',
-                            message: 'El registro fue editado de forma exitosa.',
-                        });
-                        location.href = baseUrl;
-                    }
-                    else {
-                        iziToast.error({
-                            title: 'Error',
-                            message: 'Hubo un error al editar el registro',
-                        });
-                        ocultarCargandoEditar();
-                    }
-                },
-                enviar => { });
-        }
-    }
-}
 
 //Inactivar
 $('#inactivar').click(() => {
@@ -544,5 +642,6 @@ $('#InactivarCatalogoDeducciones #btnInactivarPlanilla').click(() => {
                 });
             }
         },
-        enviar => { console.log('Enviando...'); });
+        enviar => { });
 });
+//#endregion
