@@ -556,7 +556,7 @@ $(document).ready(() => {
     }
 
     // Si esta en la pantalla de Create entonces vaciar todo
-    if (estaEnCrear > 1) {
+    if (estaEnCrear() > 1) {
         $('input[type="checkbox"]').prop("checked", false);
         inputDescripcionPlanilla.val('');
         inputFrecuenciaEnDias.val('')
